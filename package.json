@@ -1,0 +1,28 @@
+{
+  "name": "hype-radio",
+  "version": "0.1.0",
+  "description": "A command-line radio application that plays the newest songs featured on Hype Machine.",
+  "main": "lib.js",
+  "bin": "./hype-radio.js",
+  "scripts": {
+    "start": "node hype-radio",
+    "lint": "standard --fix **/*.js"
+  },
+  "keywords": [
+    "music",
+    "streaming",
+    "radio",
+    "internet radio",
+    "browser automation",
+    "puppeteer"
+  ],
+  "author": "Zach Balder",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.8",
+    "puppeteer": "^22.7.0"
+  },
+  "devDependencies": {
+    "standard": "^17.1.0"
+  }
+}
