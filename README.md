@@ -1,5 +1,7 @@
 # Hype Radio
 
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://standardjs.com/)
+
 A command-line radio application that plays the newest songs featured on [Hype Machine](https://hypem.com).
 
 ## Motivation
@@ -29,3 +31,7 @@ pnpm add -g hype-radio
 ```shell
 hype-radio
 ```
+
+**Commands:**
+* `m` - (un)mute
+* `q` - quit

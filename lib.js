@@ -21,7 +21,7 @@ async function resolveLink (link) {
   }
 }
 
-async function getTrackInfo (track) {
+async function getTrack (track) {
   const [
     artistName,
     trackName,
@@ -59,13 +59,34 @@ class Radio extends EventEmitter {
   #nextTrack = null
   #logFile = fs.createWriteStream(path.join(__dirname, 'debug.log'))
   #tracks = []
+  #muted = false
 
   log (message) {
     this.#logFile.write(message + '\n')
   }
 
+  async toggleSound () {
+    this.#muted = await this.#page.$eval('#player-volume-mute', element => {
+      return element.classList.contains('icon-speaker-mute')
+    })
+
+    await this.#page.click('#player-volume-mute')
+    this.#muted = !this.#muted
+    this.printTracks()
+  }
+
   async start () {
-    this.#browser = await puppeteer.launch({ headless: true, protocolTimeout: 0, ignoreDefaultArgs: ['--mute-audio'] })
+    this.printInfo()
+
+    this.#browser = await puppeteer.launch({
+      defaultViewport: null,
+      headless: process.env.NODE_ENV !== 'development',
+      protocolTimeout: 0,
+      ignoreDefaultArgs: [
+        '--mute-audio'
+      ]
+    })
+
     this.#page = (await this.#browser.pages())[0]
 
     await Promise.all([
@@ -76,13 +97,19 @@ class Radio extends EventEmitter {
     await this.play()
   }
 
-  printTrackInfo () {
+  printInfo () {
     process.stdout.cursorTo(0, 0)
+    process.stdout.clearScreenDown()
+    process.stdout.write('\x1b[1;35mHype Radio\x1b[0m\n\n\x1b[1mCommands:\n\x1b[0m  m - (un)mute\n  q - quit\n')
+  }
+
+  printTracks () {
+    process.stdout.cursorTo(0, 6)
     process.stdout.clearScreenDown()
 
     const message = [
       this.#currentTrack
-        ? `\x1b[1;32mNow playing:\x1b[0m "${this.#currentTrack.trackName}" by ${this.#currentTrack.artistName}\x1b[0m \x1b[5m🔊\x1b[0m`
+        ? `\x1b[1;32mNow playing:\x1b[0m "${this.#currentTrack.trackName}" by ${this.#currentTrack.artistName}\x1b[0m \x1b[5m${this.#muted ? '🔇' : '🔊'}\x1b[0m`
         : '\x1b[1;36mWaiting for next track...\x1b[0m',
       this.#currentTrack?.download?.href &&
         `${this.#currentTrack?.download.label}: ${this.#currentTrack?.download.href}`,
@@ -104,7 +131,7 @@ class Radio extends EventEmitter {
   async getTracks () {
     const trackPromises = (await this.#page.$$('div.section.section-track')).map(async trackElement => {
       try {
-        const trackInfo = await getTrackInfo(trackElement)
+        const trackInfo = await getTrack(trackElement)
 
         return { ...trackInfo, trackElement }
       } catch (error) {
@@ -148,7 +175,7 @@ class Radio extends EventEmitter {
       this.#nextTrack = this.#tracks[1] ?? null
     }
 
-    this.printTrackInfo()
+    this.printTracks()
 
     if (!this.#currentTrack) {
       this.log('Ran out of tracks')

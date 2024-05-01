@@ -1,11 +1,12 @@
 {
   "name": "hype-radio",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A command-line radio application that plays the newest songs featured on Hype Machine.",
   "main": "lib.js",
   "bin": "./hype-radio.js",
   "scripts": {
     "start": "node hype-radio",
+    "dev": "NODE_ENV=development node hype-radio",
     "lint": "standard --fix **/*.js"
   },
   "keywords": [
